@@ -85,6 +85,9 @@ export default function SearchAppBar() {
           <Button href="/signup" style={{color: "white",backgroundColor: "#21b6ae",margin: "3px"}}>
             SignUp
           </Button>
+          <Button href="/signup" style={{color: "white",backgroundColor: "#21b6ae",margin: "3px"}}>
+            SignIn
+          </Button>
         </Toolbar>
       </AppBar>
     </Box>
