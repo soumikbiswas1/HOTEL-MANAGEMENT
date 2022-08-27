@@ -5,7 +5,7 @@ const hotel = require("../models/hotel.js");
 const router=express.Router();
 
 //create
-router.post("/",async (req,res)=>{
+router.post("/api/hotels",async (req,res)=>{
 
     const newHotel = new hotel(req.body)
 
@@ -13,25 +13,27 @@ router.post("/",async (req,res)=>{
         const savedHotel = await newHotel.save();
         res.status(200).json(savedHotel)
     }catch(err){
-        res.status(500),json(err)
+        res.status(500).json(err)
     }
 })
 //UPDATE
-router.put("/",async (req,res)=>{
+router.put("/:id",async (req,res)=>{
       try{
-        const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, { $set: req.body},{new:true})
+        const updatedHotel = await hotel.findByIdAndUpdate(req.params.id,
+         { $set: req.body},
+         {new:true})
         res.status(200).json(updatedHotel);
     }catch(err){
-        res.status(500),json(err)
+        res.status(500).json(err)
     }
 })
 //DELETE
-router.delete("/",async (req,res)=>{
+router.delete("/api/hotels",async (req,res)=>{
     try{
         await hotel.findByIdAndDelete(req.params.id);
         res.status(200).json("Hotel has been deleted");
     }catch(err){
-        res.status(500),json(err)
+        res.status(500).json(err)
     }
 })
 
@@ -41,18 +43,22 @@ router.get("/:id",async (req,res)=>{
         const hotel = await hotel.findById(req.params.id)
         res.status(200).json(hotel);
     }catch(err){
-        res.status(500),json(err)
+        res.status(500).json(err)
     }
 })
 //GETALL
-router.get("/",async (req,res,next)=>{
-    console.log("hi,I am a Hotel Route")
-    return next();
+router.get("/api/hotels",async (req,res,next)=>{
+    const failed = true
+    const err= new Error()
+    err.status=404
+    err.message("Not found")
+    if(failed) return next(err)
+
     try{
         const hotels = await hotel.find();
         res.status(200).json(hotels);
     }catch(err){
-        res.status(500),json(err)
+        next(err);
     }
 })
 

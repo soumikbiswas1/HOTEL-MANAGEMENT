@@ -10,7 +10,7 @@ const PORT=3000;
 mongoose.connect(MONGOURL);
 require("./models/user")
 //mongoose.model("userSchema")
-
+app.use(express.json());
 app.use(require("./routes/auth"));
 app.use(require("./routes/hotels"));
 
@@ -31,8 +31,15 @@ app.listen(PORT,function(){
 
 
 
-app.use((req,res,send)=>{
-    res.send("Hello from middleware");
+app.use((err,req,res,send)=>{
+    const errorStatus= err.status || 500
+    const errorMessage= err.status || "Something Went Wrong"
+    return res.status(errorStatus).json({
+        success:false,
+        status:errorStatus,
+        message:errorMessage,
+        stack: err.stack
+    })
     
 })
 
