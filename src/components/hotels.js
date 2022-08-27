@@ -28,8 +28,8 @@ import olive from './images/olive.jpg';
 import trident from './images/trident.jpg';
 import fab from './images/fab.jpg';
 import novtel from './images/novtel.jpg';
-import {format} from "date-fns"
-import {DateRange} from 'react-date-range';
+import { format } from "date-fns"
+import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 
@@ -88,22 +88,42 @@ export default function Hotels() {
 
   const [search, setSearch] = useState(null);
   const [hotel, setHotel] = useState("New York")
-  const[date,setDate] = useState([
+  const [openDate, setOpenDate] = useState(false)
+  const [date, setDate] = useState([
     {
-        startDate : new Date(),
-        endDate: new Date(),
-        key: 'selection'
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection'
     }
   ]);
+  const [openOptions, setOpenOptions] = useState(false)
+  const [options, setOptions] = useState({
+    adult: 1,
+    children: 0,
+    room_no: 0
+  });
+
+  const handleOption = (name, operation) => {
+    setOptions(prev => {
+      return {
+        ...prev,
+        [name]: operation === "i" ? options[name] + 1 : options[name] - 1,
+      }
+    })
+  }
 
   useEffect(() => {
-    const fetchApi = async () => {
-      const url = `https://hotels4.p.rapidapi.com/locations/v2/search?q=${search}&units=metric&appid=00b1918968msh05614656c615d05p1bd613jsnaa82f61c5101`
-      const response = await fetch(url);
-      const resJson = await response.json()
-      setHotel(resJson.main);
-    }
-    fetchApi();
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': 'd9c12c0895mshc912211ef859cd7p18d93ejsn2bb3bc14e22a',
+        'X-RapidAPI-Host': 'hotels4.p.rapidapi.com'
+      }
+    };
+    fetch('https://hotels4.p.rapidapi.com/locations/v2/search?query=india', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err))
   }, [search]
   )
   return (
@@ -127,34 +147,8 @@ export default function Hotels() {
           >
             Hotels Of Your Comfort
           </Typography>
-          <Box>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search your hotel"
-              type="search"
-              className="inputField"
-              // defaultValue=""
-              // onChange={(event) => {
-              //   setSearch(event.target.value)
-              // }}
-            />
-          </Search>
-          <span> Date to Date</span>
-          <DateRange
-          editableDateInputs={true}
-          onChange={item => setDate([item.selection])}
-          moveRangeOnFirstSelection={false}
-          ranges={date}
 
-          style={{position: "absolute", backgroundColor: "white"}}
-          />
-          <span>2 Adults 2 children 1 roon</span>
-          <Button  style={{ color: "white", backgroundColor: "#21b6ae", margin: "3px" }}>SEARCH</Button>
-          </Box>
-         
+
           <Button href="/signup" style={{ color: "white", backgroundColor: "#21b6ae", margin: "3px" }}>
             SignUp
           </Button>
@@ -162,9 +156,90 @@ export default function Hotels() {
             SignIn
           </Button>
 
-         
+
         </Toolbar>
       </AppBar>
+
+      <Search>
+        <SearchIconWrapper>
+          <SearchIcon />
+        </SearchIconWrapper>
+        <StyledInputBase
+          placeholder="Search your hotel"
+          type="search"
+          className="inputField"
+          onChange= {(event) =>{   
+            setSearch(event.target.value)
+        }}
+        />
+      </Search>
+
+      <span style={{ backgroundColor: "white" }}>
+        <span onClick={() => setOpenDate(!openDate)} style={{ color: "black" }}>
+          {`${format(date[0].startDate, "MM/dd/yyyy")} to ${format(date[0].endDate, "MM/dd/yyyy")}`}
+        </span>
+        {openDate && <DateRange
+          editableDateInputs={true}
+          onChange={item => setDate([item.selection])}
+          moveRangeOnFirstSelection={false}
+          ranges={date}
+          style={{ position: "absolute", backgroundColor: "white" }}
+        />}</span>
+
+      <span style={{ margin: "4px" }}>
+        <span style={{ color: "black" }}
+          onClick={() => setOpenOptions(!openOptions)}>{`${options.adult} Adult,${options.children} Children,Room: ${options.room_no} `}</span>
+      </span>
+
+      {openOptions &&
+        <Box>
+          <span >
+            <span style={{ color: "black" }}>Adult</span>
+            <Button
+              disabled={options.adult <= 1}
+              variant="outlined" onClick={() => handleOption("adult", "d")}>
+              -
+            </Button>
+            <span style={{ color: "black" }}>{options.adult}</span>
+            <Button variant="outlined" onClick={() => handleOption("adult", "i")}>
+              +
+            </Button>
+          </span>
+
+          <span>
+            <span style={{ color: "black" }}>Children</span>
+            <Button
+              disabled={options.children <= 0}
+              variant="outlined" onClick={() => handleOption("children", "d")}>
+              -
+            </Button>
+            <span style={{ color: "black" }}>{options.children}</span>
+            <Button variant="outlined" onClick={() => handleOption("children", "i")}>
+              +
+            </Button>
+          </span>
+          <span>
+            <span style={{ color: "black" }}>Room No</span>
+            <Button
+              disabled={options.room_no <= 0}
+              variant="outlined" onClick={() => handleOption("room_no", "d")}>
+              -
+            </Button>
+            <span style={{ color: "black" }}>{options.room_no}</span>
+            <Button variant="outlined" onClick={() => handleOption("room_no", "i")}>
+              +
+            </Button>
+          </span>
+
+
+        </Box>}
+      <Button
+        onClick={(event) => {
+          setSearch(event.target.value)
+        }}
+        style={{ color: "white", backgroundColor: "#21b6ae", margin: "3px" }}>SEARCH</Button>
+
+
       {
         !hotel ? (
           <><h1 style={{ textAlign: "center" }}>HOTELS FOR YOUR COMFORT</h1>
@@ -324,4 +399,3 @@ export default function Hotels() {
 
   )
 }
-
